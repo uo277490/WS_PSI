@@ -3,11 +3,13 @@ import time
 
 from Crypto.handlers.CAOPEHandler import CAOPEHandler
 from Crypto.handlers.DomainPSIHandler import DomainPSIHandler
+from Crypto.handlers.IKNPHandler import IKNPHandler
 from Crypto.handlers.OPEHandler import OPEHandler
 from Crypto.handlers.OPRFHandler import OPRFHandler
 from Crypto.helpers.BFVHelper import BFVHelper
 from Crypto.helpers.CryptoImplementation import CryptoImplementation
 from Crypto.helpers.DamgardJurikHandler import DamgardJurikHelper
+from Crypto.helpers.IKNPHelper import IKNPHelper
 from Crypto.helpers.OPRFHelper import OPRFHelper
 from Crypto.helpers.PaillierHandler import PaillierHelper
 from Logs import Logs
@@ -30,7 +32,8 @@ class JSONHandler:
                                  "Damgard-Jurik_OPE", "Damgard-Jurik OPE", "DamgardJurik PSI-CA OPE",
                                  "Damgard-Jurik PSI-CA OPE"): DamgardJurikHelper(),
             CryptoImplementation("BFV", "BFV_OPE", "BFV OPE"): BFVHelper(),
-            CryptoImplementation("OPRF"): OPRFHelper()
+            CryptoImplementation("OPRF"): OPRFHelper(),
+            CryptoImplementation("IKNP"): IKNPHelper()
         }
         self.OPEHandler = OPEHandler(id, my_data, domain, devices, results)
         self.CAOPEHandler = CAOPEHandler(id, my_data, domain, devices, results)
@@ -40,6 +43,7 @@ class JSONHandler:
         self.executor = PriorityExecutor(max_workers=10)
         self.new_peer = new_peer_function
         self.OPRFHandler = OPRFHandler(id, my_data, domain, devices, results)
+        self.IKNPHandler = IKNPHandler(id, my_data, domain, devices, results)
 
     def test_launcher(self, device):
         cs_handlers = self.CSHandlers.values()
@@ -78,6 +82,10 @@ class JSONHandler:
             elif type == "OPRF":
                 for _ in range(int(rounds)):
                     self.executor.submit(0, self.OPRFHandler.intersection_first_step, device, cs)
+            elif type == "IKNP":
+                print("entra JSON first step")
+                for _ in range(int(rounds)):
+                    self.executor.submit(0, self.IKNPHandler.intersection_first_step, device, cs)
             else:
                 return "Invalid type: " + type if cs.imp_name != "BFV" else "BFV does not support PSI-CA... yet"
             return ("Intersection with " + device + " - " + scheme + " - " + type + " - Rounds: " + str(rounds) +
@@ -110,6 +118,10 @@ class JSONHandler:
             elif "OPRF" in message['implementation']:
                 self.executor.submit(1, self.OPRFHandler.intersection_second_step, message['peer'], cs,
                                      message['data'], message['pubkey'])
+            elif "IKNP" in message['implementation']:
+                print("entra JSON second step")
+                self.executor.submit(1, self.IKNPHandler.intersection_second_step, message['peer'], cs,
+                                     message['data'], message.get('pubkey'))
             else:
                 self.executor.submit(1, self.domainPSIHandler.intersection_second_step, message['peer'], cs,
                                      message['data'], message['pubkey'])
@@ -128,6 +140,10 @@ class JSONHandler:
                                      message['data'])
             elif "OPRF" in message['implementation']:
                 self.executor.submit(2, self.OPRFHandler.intersection_final_step, message['peer'], cs,
+                                     message['data'])
+            elif "IKNP" in message['implementation']:
+                print("entra JSON final step")
+                self.executor.submit(2, self.IKNPHandler.intersection_final_step, message['peer'], cs,
                                      message['data'])
             else:
                 self.executor.submit(2, self.domainPSIHandler.intersection_final_step, message['peer'], cs,

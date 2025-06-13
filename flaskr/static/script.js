@@ -68,6 +68,7 @@ function update_devices() {
                 ' <button class="btn waves-effect waves-light" onclick="FindIntersection(\'' + key + '\', \'' + 'Paillier PSI-CA OPE' + '\', \'' + 'PSI-CA' +'\')">Cardinality - Paillier</button>' +
                 ' <button class="btn waves-effect waves-light" onclick="FindIntersection(\'' + key + '\', \'' + 'Damgard-Jurik PSI-CA OPE' + '\', \'' + 'PSI-CA' +'\')">Cardinality - Damgard-Jurik</button>' +
                 ' <button class="btn waves-effect waves-light" onclick="FindIntersection(\'' + key + '\', \'' + 'OPRF' + '\', \'' + 'OPRF' +'\')">OPRF</button>' +
+                ' <button class="btn waves-effect waves-light" onclick="FindIntersection(\'' + key + '\', \'' + 'IKNP' + '\', \'' + 'IKNP' +'\')">IKNP</button>' +
                 ' <button class="btn waves-effect waves-light" onclick="test(\'' + key + '\')">Launch test</button>'
                 );
             });
