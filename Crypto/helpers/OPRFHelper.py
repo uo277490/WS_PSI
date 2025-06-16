@@ -1,6 +1,7 @@
 from oprf import data, mask
 from Crypto.helpers.CSHelper import CSHelper
 
+
 class OPRFHelper(CSHelper):
     def __init__(self):
         super().__init__()

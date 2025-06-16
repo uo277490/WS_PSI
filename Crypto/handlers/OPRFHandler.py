@@ -7,6 +7,7 @@ from Logs import Logs
 from Logs.log_activity import log_activity
 from Network.collections.DbConstants import VERSION
 
+
 class OPRFHandler(IntersectionHandler):
     def __init__(self, id, my_data, domain, devices, results):
         super().__init__(id, my_data, domain, devices, results)
@@ -25,7 +26,6 @@ class OPRFHandler(IntersectionHandler):
             masked_list.append(masked.to_base64())
         self.send_message(device, masked_list, cs.imp_name, cs.serialize_public_key())
         return masked_list, self.masked_points
-
 
     @log_activity("OPRF")
     def intersection_second_step(self, device, cs, peer_data, pubkey):
@@ -46,7 +46,7 @@ class OPRFHandler(IntersectionHandler):
             "server_prfs": self_prfs
         }, cs.imp_name)
 
-        return { 'oprf': evaluated_b64, 'prf_b': self_prfs }
+        return {'oprf': evaluated_b64, 'prf_b': self_prfs}
 
     @log_activity("OPRF")
     def intersection_final_step(self, device, cs, peer_data):

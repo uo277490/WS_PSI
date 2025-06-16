@@ -18,7 +18,6 @@ class IKNPHandler(IntersectionHandler):
 
         return sys.getsizeof(t_matrix), 0
 
-
     @log_activity("IKNP")
     def intersection_second_step(self, device, cs, payload, pubkey):
         t_matrix = payload
@@ -26,8 +25,8 @@ class IKNPHandler(IntersectionHandler):
         ctxts = cs.generate_ciphertexts(self.my_data, u0, u1)
 
         serial_ctxts = [
-            (C0.hex(), C1.hex())
-            for (C0, C1) in ctxts
+            (c0.hex(), c1.hex())
+            for (c0, c1) in ctxts
         ]
 
         payload = {

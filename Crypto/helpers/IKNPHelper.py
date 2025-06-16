@@ -48,12 +48,12 @@ class IKNPHelper(CSHelper):
     def generate_ciphertexts(self, data, u0, u1):
         ctxts = []
         for i, y in enumerate(data):
-            K0 = self.derive_key(u0[i])
-            K1 = self.derive_key(u1[i])
-            L = self.label_to_key(y)
-            C0 = bytes(a ^ b for a, b in zip(K0, L))
-            C1 = bytes(a ^ b for a, b in zip(K1, L))
-            ctxts.append((C0, C1))
+            key0 = self.derive_key(u0[i])
+            key1 = self.derive_key(u1[i])
+            label = self.label_to_key(y)
+            c0 = bytes(a ^ b for a, b in zip(key0, label))
+            c1 = bytes(a ^ b for a, b in zip(key1, label))
+            ctxts.append((c0, c1))
         return ctxts
 
     def compute_sender_matrices(self, t_matrix_list: Sequence):

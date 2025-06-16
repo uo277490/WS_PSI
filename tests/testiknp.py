@@ -1,23 +1,24 @@
 import unittest
-
 from Crypto.helpers.IKNPHelper import IKNPHelper
+
 
 def test_generate_receiver_matrix():
     helper = IKNPHelper(k=16)
     m = 5
-    T, b = helper.generate_receiver_matrix(m)
+    t, b = helper.generate_receiver_matrix(m)
 
-    assert isinstance(T, list) and len(T) == helper.k
-    assert all(isinstance(col, list) and len(col) == m for col in T)
+    assert isinstance(t, list) and len(t) == helper.k
+    assert all(isinstance(col, list) and len(col) == m for col in t)
     # b debe tener longitud m y contener sólo {0,1}
     assert isinstance(b, list) and len(b) == m
     assert set(b) <= {0,1}
 
+
 def test_compute_sender_matrices():
     helper = IKNPHelper(k=8)
     m = 3
-    T, _ = helper.generate_receiver_matrix(m)
-    u0, u1 = helper.compute_sender_matrices(T)
+    t, _ = helper.generate_receiver_matrix(m)
+    u0, u1 = helper.compute_sender_matrices(t)
     # u0 y u1 deben ser listas de m vectores de k bits
     assert isinstance(u0, list) and isinstance(u1, list)
     assert len(u0) == m and len(u1) == m
@@ -28,11 +29,12 @@ def test_compute_sender_matrices():
         xor01 = [x ^ y for x, y in zip(v0, v1)]
         assert xor01 == delta_row
 
+
 def test_derive_keys_from_selection():
     helper = IKNPHelper(k=8)
     m = 4
-    T, b = helper.generate_receiver_matrix(m)
-    u0, u1 = helper.compute_sender_matrices(T)
+    t, b = helper.generate_receiver_matrix(m)
+    u0, u1 = helper.compute_sender_matrices(t)
     keys = helper.derive_keys_from_selection(u0, u1, b)
     # Debe devolver m claves SHA256 (32 bytes cada una)
     assert isinstance(keys, list) and len(keys) == m
@@ -40,23 +42,25 @@ def test_derive_keys_from_selection():
     # Las claves deben diferir al menos en algunos índices (no todas iguales)
     assert len(set(keys)) > 1
 
+
 def test_generate_recover_ciphertexts():
     helper = IKNPHelper(k=16)
     data = [b"alice", b"bob", b"carol"]
     # Paso R1/R2
-    T, b = helper.generate_receiver_matrix(len(data))
+    t, b = helper.generate_receiver_matrix(len(data))
     # Paso S2
-    u0, u1 = helper.compute_sender_matrices(T)
-    ctxts  = helper.generate_ciphertexts(data, u0, u1)
+    u0, u1 = helper.compute_sender_matrices(t)
+    ctxts = helper.generate_ciphertexts(data, u0, u1)
     # Paso R3
     keys = helper.derive_keys_from_selection(u0, u1, b)
     # Recuperación: para cada i, C_b[i] XOR key[i] == SHA256(data[i])
     for i, item in enumerate(data):
-        L = helper.label_to_key(item)
-        C0, C1 = ctxts[i]
-        Cb = C0 if b[i] == 0 else C1
-        recovered = bytes(a ^ b for a, b in zip(keys[i], Cb))
-        assert recovered == L
+        l = helper.label_to_key(item)
+        c0, c1 = ctxts[i]
+        cb = c0 if b[i] == 0 else c1
+        recovered = bytes(a ^ b for a, b in zip(keys[i], cb))
+        assert recovered == l
+
 
 def test_label_to_key():
     helper = IKNPHelper()
@@ -66,16 +70,17 @@ def test_label_to_key():
     # Debe ser determinista e idéntico para str/bytes
     assert h1 == h2
 
+
 def test_full_intersection():
     helper = IKNPHelper(k=32)
     # Conjunto emisor A y receptor B con intersección {2,4}
     A = [1,2,3,4,5]
     B = [2,4,6,8,10]
     # R1/R2
-    T, b = helper.generate_receiver_matrix(len(B))
+    t, b = helper.generate_receiver_matrix(len(B))
     # S2
-    u0, u1 = helper.compute_sender_matrices(T)
-    ctxts  = helper.generate_ciphertexts(A, u0, u1)
+    u0, u1 = helper.compute_sender_matrices(t)
+    ctxts = helper.generate_ciphertexts(A, u0, u1)
     # R3
     keys_B = helper.derive_keys_from_selection(u0, u1, b)
     # Receptor descifra hashes de A∩B
@@ -92,6 +97,7 @@ def test_full_intersection():
     inv = {helper.label_to_key(x): x for x in A}
     intersection = sorted(inv[h] for h in common)
     assert intersection == [2, 4]
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -4,12 +4,14 @@ import time
 from Crypto.handlers.CAOPEHandler import CAOPEHandler
 from Crypto.handlers.DomainPSIHandler import DomainPSIHandler
 from Crypto.handlers.IKNPHandler import IKNPHandler
+from Crypto.handlers.KKHandler import KKHandler
 from Crypto.handlers.OPEHandler import OPEHandler
 from Crypto.handlers.OPRFHandler import OPRFHandler
 from Crypto.helpers.BFVHelper import BFVHelper
 from Crypto.helpers.CryptoImplementation import CryptoImplementation
 from Crypto.helpers.DamgardJurikHandler import DamgardJurikHelper
 from Crypto.helpers.IKNPHelper import IKNPHelper
+from Crypto.helpers.KKHelper import KKHelper
 from Crypto.helpers.OPRFHelper import OPRFHelper
 from Crypto.helpers.PaillierHandler import PaillierHelper
 from Logs import Logs
@@ -33,7 +35,8 @@ class JSONHandler:
                                  "Damgard-Jurik PSI-CA OPE"): DamgardJurikHelper(),
             CryptoImplementation("BFV", "BFV_OPE", "BFV OPE"): BFVHelper(),
             CryptoImplementation("OPRF"): OPRFHelper(),
-            CryptoImplementation("IKNP"): IKNPHelper()
+            CryptoImplementation("IKNP"): IKNPHelper(),
+            CryptoImplementation("KK"): KKHelper()
         }
         self.OPEHandler = OPEHandler(id, my_data, domain, devices, results)
         self.CAOPEHandler = CAOPEHandler(id, my_data, domain, devices, results)
@@ -44,6 +47,7 @@ class JSONHandler:
         self.new_peer = new_peer_function
         self.OPRFHandler = OPRFHandler(id, my_data, domain, devices, results)
         self.IKNPHandler = IKNPHandler(id, my_data, domain, devices, results)
+        self.KKHandler = KKHandler(id, my_data, domain, devices, results)
 
     def test_launcher(self, device):
         cs_handlers = self.CSHandlers.values()
@@ -83,10 +87,13 @@ class JSONHandler:
                 for _ in range(int(rounds)):
                     self.executor.submit(0, self.OPRFHandler.intersection_first_step, device, cs)
             elif type == "IKNP":
-                print("entra JSON first step")
                 for _ in range(int(rounds)):
                     self.executor.submit(0, self.IKNPHandler.intersection_first_step, device, cs)
+            elif type == "KK":
+                for _ in range(int(rounds)):
+                    self.executor.submit(0, self.KKHandler.intersection_first_step, device, cs)
             else:
+
                 return "Invalid type: " + type if cs.imp_name != "BFV" else "BFV does not support PSI-CA... yet"
             return ("Intersection with " + device + " - " + scheme + " - " + type + " - Rounds: " + str(rounds) +
                     " - Task started, check logs")
@@ -119,8 +126,10 @@ class JSONHandler:
                 self.executor.submit(1, self.OPRFHandler.intersection_second_step, message['peer'], cs,
                                      message['data'], message['pubkey'])
             elif "IKNP" in message['implementation']:
-                print("entra JSON second step")
                 self.executor.submit(1, self.IKNPHandler.intersection_second_step, message['peer'], cs,
+                                     message['data'], message.get('pubkey'))
+            elif "KK" in message['implementation']:
+                self.executor.submit(1, self.KKHandler.intersection_second_step, message['peer'], cs,
                                      message['data'], message.get('pubkey'))
             else:
                 self.executor.submit(1, self.domainPSIHandler.intersection_second_step, message['peer'], cs,
@@ -142,8 +151,10 @@ class JSONHandler:
                 self.executor.submit(2, self.OPRFHandler.intersection_final_step, message['peer'], cs,
                                      message['data'])
             elif "IKNP" in message['implementation']:
-                print("entra JSON final step")
                 self.executor.submit(2, self.IKNPHandler.intersection_final_step, message['peer'], cs,
+                                     message['data'])
+            elif "KK" in message['implementation']:
+                self.executor.submit(2, self.KKHandler.intersection_final_step, message['peer'], cs,
                                      message['data'])
             else:
                 self.executor.submit(2, self.domainPSIHandler.intersection_final_step, message['peer'], cs,

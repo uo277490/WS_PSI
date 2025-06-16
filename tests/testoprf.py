@@ -1,4 +1,3 @@
-
 import unittest
 from oprf import data, mask
 
@@ -22,10 +21,10 @@ class TestOPRFProtocol(unittest.TestCase):
         client_masks = {}
         client_masked_b64 = []
         for x in A:
-            P = data.hash(x)
+            p = data.hash(x)
             m = mask.random()
             client_masks[x] = m
-            client_masked_b64.append((m * P).to_base64())
+            client_masked_b64.append((m * p).to_base64())
 
         # Fase 2: servidor evalúa los puntos enmascarados y calcula sus propios PRF
         server_evaluated_b64 = []
@@ -36,8 +35,8 @@ class TestOPRFProtocol(unittest.TestCase):
 
         server_prf_b_b64 = []
         for y in B:
-            Q = data.hash(y)
-            prf_b = self.server.get_secret() * Q
+            q = data.hash(y)
+            prf_b = self.server.get_secret() * q
             server_prf_b_b64.append(prf_b.to_base64())
 
         # Fase 3: cliente desenmascara y calcula intersección
@@ -93,6 +92,7 @@ class TestOPRFProtocol(unittest.TestCase):
         result = [x for x, v in prf_a.items() if v in server_prf_b_b64]
         self.assertListEqual(result, [],
                              f"Se esperaba intersección vacía, se obtuvo {result}")
+
 
 if __name__ == "__main__":
     unittest.main()
