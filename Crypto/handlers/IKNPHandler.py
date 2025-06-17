@@ -64,6 +64,7 @@ class IKNPHandler(IntersectionHandler):
 
         # Registrar y enviar resultado
         print("Interseccion: ", intersection)
+        self.results[device + " " + cs.imp_name] = intersection
         Logs.log_result("IKNP", intersection, VERSION, self.id, device)
         self.send_message(device, intersection, cs.imp_name, None)
 

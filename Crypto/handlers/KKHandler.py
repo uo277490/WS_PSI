@@ -31,7 +31,7 @@ class KKHandler(IntersectionHandler):
         intersection = cs.decode_intersection(self.my_data, peer_data)
 
         print("Intersection: ", intersection)
-
+        self.results[device + " " + cs.imp_name] = intersection
         Logs.log_result(cs.imp_name, intersection, VERSION, self.id, device)
         self.send_message(device, intersection, cs.imp_name, None)
 

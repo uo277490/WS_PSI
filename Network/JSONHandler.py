@@ -56,6 +56,9 @@ class JSONHandler:
                 self.executor.submit(0, self.domainPSIHandler.intersection_first_step, device, cs)
                 self.executor.submit(0, self.OPEHandler.intersection_first_step, device, cs)
                 self.executor.submit(0, self.CAOPEHandler.intersection_first_step, device, cs)
+                self.executor.submit(0, self.OPRFHandler.intersection_first_step, device, cs)
+                self.executor.submit(0, self.IKNPHandler.intersection_first_step, device, cs)
+                self.executor.submit(0, self.KKHandler.intersection_first_step, device, cs)
 
     def genkeys(self, cs, bit_length=None, domain=None):
         start_time = time.time()
