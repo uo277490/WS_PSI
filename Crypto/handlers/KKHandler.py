@@ -14,7 +14,7 @@ class KKHandler(IntersectionHandler):
         encoded = cs.encode_elements(self.my_data)
         payload = {**seeds, **encoded}
         self.send_message(device, payload, cs.imp_name, cs.serialize_public_key())
-        return payload
+        return payload, 0
 
     @log_activity("KK")
     def intersection_second_step(self, device, cs, peer_data, pubkey):
@@ -24,7 +24,7 @@ class KKHandler(IntersectionHandler):
         result = cs.extend_ot(choices)
 
         self.send_message(device, {'selections': result['selections']}, cs.imp_name)
-        return result
+        return result, 0
 
     @log_activity("KK")
     def intersection_final_step(self, device, cs, peer_data):
